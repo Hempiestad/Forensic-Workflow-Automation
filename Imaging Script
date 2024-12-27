@@ -1,0 +1,37 @@
+# Define the imaging tool path and source drive
+$imageToolPath = "C:\Tools\FTKImager.exe"
+$sourceDrive = "\\.\PhysicalDrive1"
+
+# Prompt the user for the output folder path
+$outputFolder = Read-Host "Enter the output folder path (e.g., D:\ForensicImages\Case123)"
+
+# Validate the folder path
+if ([string]::IsNullOrWhiteSpace($outputFolder)) {
+    Write-Host "Output folder path cannot be empty. Exiting script." -ForegroundColor Red
+    exit
+}
+
+# Create the folder if it doesn't exist
+if (!(Test-Path $outputFolder)) {
+    Write-Host "Folder does not exist. Creating folder: $outputFolder"
+    New-Item -ItemType Directory -Path $outputFolder
+}
+
+# Prompt the user for the image name
+$imageName = Read-Host "Enter the image name (e.g., Case123_Device1.E01)"
+
+# Validate the image name
+if ([string]::IsNullOrWhiteSpace($imageName)) {
+    Write-Host "Image name cannot be empty. Exiting script." -ForegroundColor Red
+    exit
+}
+
+# Full path for the image file
+$outputImagePath = Join-Path -Path $outputFolder -ChildPath $imageName
+
+# Run the imaging tool
+Write-Host "Starting imaging process..."
+Start-Process -FilePath $imageToolPath -ArgumentList "-drive $sourceDrive -out $outputImagePath" -Wait
+
+Write-Host "Imaging completed successfully. Image saved to $outputImagePath" -ForegroundColor Green
+
