@@ -1,0 +1,16 @@
+$watcher = New-Object System.IO.FileSystemWatcher
+$watcher.Path = "D:\ForensicImages\Case123"
+$watcher.Filter = "*.E01"
+$watcher.IncludeSubdirectories = $false
+$watcher.EnableRaisingEvents = $true
+
+Register-ObjectEvent -InputObject $watcher -EventName Created -Action {
+    $filePath = $Event.SourceEventArgs.FullPath
+    Write-Host "New file detected: $filePath"
+    
+    # Trigger forensic analysis tool
+    $analysisToolPath = "C:\Tools\Autopsy.exe"
+    $analysisArguments = "-input $filePath -output D:\AnalysisReports\Case123"
+    Start-Process -FilePath $analysisToolPath -ArgumentList $analysisArguments -Wait
+
+    Write-Host "Analysis completed for: $filePath"
