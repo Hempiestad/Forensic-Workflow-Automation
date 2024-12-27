@@ -1,0 +1,41 @@
+# Ask for operator input
+$caseNumber = Read-Host "Enter the case number"
+$suspectName = Read-Host "Enter the suspect's name"
+$evidenceCount = Read-Host "Enter the number of evidence items" | Out-String
+
+# Validate evidence count
+if (-not ($evidenceCount -as [int])) {
+    Write-Host "The evidence count must be a number." -ForegroundColor Red
+    exit
+}
+
+# Set base directory
+$baseDir = "\\192.168.0.25\GPD-fx-2\Hempstead"
+
+# Create case folder path
+$caseFolderName = "$caseNumber - $suspectName"
+$caseFolderPath = Join-Path -Path $baseDir -ChildPath $caseFolderName
+
+# Check if case folder exists
+if (Test-Path $caseFolderPath) {
+    Write-Host "Case folder already exists." -ForegroundColor Yellow
+    exit
+}
+
+# Create main case folder and subfolders
+New-Item -Path $caseFolderPath -ItemType Directory | Out-Null
+$subFolders = @("Images", "Media", "Griffeye")
+foreach ($subFolder in $subFolders) {
+    $subFolderPath = Join-Path -Path $caseFolderPath -ChildPath $subFolder
+    New-Item -Path $subFolderPath -ItemType Directory | Out-Null
+
+    # Create evidence subfolders for Images and Media
+    if ($subFolder -in @("Images", "Media")) {
+        for ($i = 1; $i -le [int]$evidenceCount; $i++) {
+            $evidenceFolderPath = Join-Path -Path $subFolderPath -ChildPath "Evidence $i"
+            New-Item -Path $evidenceFolderPath -ItemType Directory | Out-Null
+        }
+    }
+}
+
+Write-Host "Case folder structure created successfully at $caseFolderPath" -ForegroundColor Green
